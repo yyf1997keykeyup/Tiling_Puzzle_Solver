@@ -1,5 +1,6 @@
 package util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Piece {
@@ -53,4 +54,16 @@ public class Piece {
     public char[][] getDisplay() {
         return display;
     }
+
+    // todo: rotations and reflections
+//    public char[][][] getRotatedDisplays() {
+//        List<char[][]> res = new ArrayList<>();
+//        char[][] original = getDisplay();
+//        char[][] rotated = Common.rotateMatrixBy90Degree(original);
+//
+//    }
+//
+//    public char[][][] getReflectedDisplays() {
+//
+//    }
 }

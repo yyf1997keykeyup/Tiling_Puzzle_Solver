@@ -1,10 +1,9 @@
 package util;
 
-class Cell {
+public class Cell {
     private int x;
     private int y;
     private char color;       // 颜色
-    private int BelongColor;  // 板块色号
 
     public int getX() {
         return x;
@@ -16,10 +15,6 @@ class Cell {
 
     public char getColor() {
         return color;
-    }
-
-    public int getBelongColor() {
-        return BelongColor;
     }
 
     public Cell(int x, int y, char color) {

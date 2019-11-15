@@ -1,5 +1,7 @@
 package util;
 
+import solver.DLX;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,24 +113,37 @@ public class FileParser {
         return board;
     }
 
-    public static void main(String[] args) {
+    public static void test(String path) {
         // todo: delete it later. For debugging right now.
-        FileParser fp = new FileParser("testcases/basecase.txt");
+        FileParser fp = new FileParser(path);
         List<List<Character>> cellsDisplay = fp.read();
         List<Piece> pieces = fp.CellsToPieces(cellsDisplay);
         Piece board = fp.extractBoard(pieces);
 
-        System.out.println("pieces:");
-        for (Piece piece : pieces) {
-            System.out.println("pieces " + piece.getId() + ":");
-            for (char[] line : piece.getDisplay()) {
-                System.out.println(line);
-            }
-        }
+//        System.out.println("pieces:");
+//        for (Piece piece : pieces) {
+//            System.out.println("pieces " + piece.getId() + ":");
+//            for (char[] line : piece.getDisplay()) {
+//                System.out.println(line);
+//            }
+//        }
+//
+//        System.out.println("board:");
+//        for (char[] line : board.getDisplay()) {
+//            System.out.println(line);
+//        }
 
-        System.out.println("board:");
-        for (char[] line : board.getDisplay()) {
-            System.out.println(line);
-        }
+        DLX dlx = new DLX(board, pieces);
+        dlx.run();
+//        System.out.println("END");
+    }
+
+    public static void main(String[] args) {
+        System.out.println("easycase");
+        test("testcases/easycase.txt");
+        System.out.println("simplecase");
+        test("testcases/simplecase.txt");
+        System.out.println("midcase");
+        test("testcases/midcase.txt");
     }
 }
