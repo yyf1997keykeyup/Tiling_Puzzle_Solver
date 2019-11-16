@@ -7,6 +7,7 @@ import java.util.*;
 public class DLX {
 
     private DLXHeader headerDummy;
+    private List<DLXNode> rowDummies;
     private DLXHeader DLXSpaceHeaderEnd;  // the end of space headers, start of piece headers.
     private char[][] boardDisplay;
     private HashMap<Integer, DLXHeader> idx2spaceHeader;
@@ -16,14 +17,15 @@ public class DLX {
 
     public DLX(Piece board, List<Piece> pieces) {
         headerDummy = new DLXHeader();
+        rowDummies = new ArrayList<>();
         boardDisplay = board.getDisplay();
         idx2spaceHeader = new HashMap<>();
         spaceHeader2idx = new HashMap<>();
         id2PieceHeader = new HashMap<>();
         header2lowestNode = new HashMap<>();
-
         addHeaders(pieces);
         addRows(pieces);
+//        printNodes();
     }
 
     public int getRowSize() {
@@ -44,6 +46,32 @@ public class DLX {
     private void addHeaders(List<Piece> pieces) {
         addSpaceHeaders();
         addPieceHeaders(pieces);
+    }
+
+    private void printNodes() {
+        String[][] nodeDisplay = new String[rowDummies.size() + 1][header2lowestNode.size()];
+        Map<String, Integer> headerName2col = new HashMap<>();
+        DLXHeader headerPoint = headerDummy.getR();
+        int col = 0;
+        while (headerPoint != null) {
+            nodeDisplay[0][col] = headerPoint.getN();
+            headerName2col.put(headerPoint.getN(), col++);
+            headerPoint = headerPoint.getR();
+        }
+        for (int i=0; i<rowDummies.size(); i++) {
+            DLXNode rowNode = rowDummies.get(i).getR();
+            while(rowNode != null) {
+                String headerName = rowNode.getC().getN();
+                nodeDisplay[i+1][headerName2col.get(headerName)] = rowNode.toString();
+                rowNode = rowNode.getR();
+            }
+        }
+        for(String[] row : nodeDisplay) {
+            for(String cell : row) {
+                System.out.print(cell + "\t");
+            }
+            System.out.println();
+        }
     }
 
     private void addSpaceHeaders() {
@@ -113,6 +141,7 @@ public class DLX {
         }
         String idString = String.valueOf(piece.getId());
         DLXHeader header = id2PieceHeader.get(idString);
+        rowDummies.add(rowDummy);
         addNode(header, rowHead);
     }
 
@@ -165,84 +194,114 @@ public class DLX {
         int idx = spaceHeader2idx.get(header);
         int y = idx / getRowSize();
         int x = idx % getRowSize();
+        if (y >= getRowSize() || x >= getColSize()) {
+            return false;
+        }
         return color == boardDisplay[y][x];
     }
 
     public void run() {
-        Set<String> coveredSet = new HashSet<>();
-
+        Map<String, String> coveredMap = new HashMap<>();
         Stack<DLXLevel> levelStack = new Stack<>();
         DLXHeader headerPointer = headerDummy.getR();
-
-        levelStack.push(createLevel(headerPointer, coveredSet));
-
+        DLXLevel firstLevel = createLevel(headerPointer, coveredMap);
+        levelStack.push(firstLevel);
         do {
             DLXLevel level = levelStack.peek();
-            Stack<DLXNode> usedStack = level.getUsedStack();
-            Stack<DLXNode> candidateStack = level.getCandidateStack();
-
-            // 从候选行中选择下一个行，作为当前尝试的路径
-            // 如果这不是第一个候选行（coveredSet中有该候选行的数据），先转移当前候选行，并删除在coveredSet中的数据
-            // 选用下一个候选行。
-            if (!candidateStack.isEmpty() && coveredSet.contains(candidateStack.peek().getC().getN())) {
+            Stack<DLXNode> usedStack = level.getUsedStack();  // 回收栈
+            Stack<DLXNode> candidateStack = level.getCandidateStack();  // 候选行栈
+            /**
+             * 从候选行中选择下一个行，作为当前尝试的路径
+             * 1. 如果这不是第一次遍历该Level的候选行时（当coveredSet中有该候选行的数据时），
+             *    转移当前候选行到回收栈，并删除在coveredSet中的数据
+             * 2. 然后选用下一个候选行。
+             */
+            // 如果有候选行，且不是第一次遍历该Level的候选行时。
+            if (!candidateStack.isEmpty() && coveredMap.containsKey(candidateStack.peek().getC().getN())) {
                 DLXNode candidate = candidateStack.pop();
+                // 删除该候选行在coveredSet中插入的数据
                 DLXNode nextNode = candidate;
                 while (nextNode != null) {
-                    coveredSet.remove(nextNode.getC().getN());
+                    coveredMap.remove(nextNode.getC().getN());
                     nextNode = nextNode.getR();
                 }
+                // 转移当前候选行到回收栈
                 usedStack.add(candidate);
             }
+            // 当有下一候选行时，选用下一个候选行。
             if (!candidateStack.isEmpty()) {
                 DLXNode coveredNode = candidateStack.peek();
-                // 加入map中，标记以覆盖的区域
+                // 寻找Piece ID
+                while(coveredNode.getR() != null) {
+                    coveredNode = coveredNode.getR();
+                }
+                String PieceId = coveredNode.getC().getN();
+
+                // 加入Set中，标记所覆盖的区域
+                coveredNode = candidateStack.peek();
                 while (coveredNode != null) {
-                    coveredSet.add(coveredNode.getC().getN());
+                    coveredMap.put(coveredNode.getC().getN(), PieceId);
                     coveredNode = coveredNode.getR();
                 }
                 // todo: Get one solution!
-                if (coveredSet.size() == getHeaderSize()) {
+                if (coveredMap.size() == getHeaderSize()) {
                     System.out.println("[INFO]Get one solution!!!!!!!!!");
+//                    extractResult(levelStack);
+                    printResult(coveredMap);
                 }
-                // 如果还有下一个level，向下一个level继续尝试
-                while (headerPointer != null && coveredSet.contains(headerPointer.getN())) {
+                // 寻找下一个还没有被cover到的header，若找到，即为下一个level
+                while (headerPointer != null && coveredMap.containsKey(headerPointer.getN())) {
                     headerPointer = headerPointer.getR();
                 }
+                // 如果还有下一个level，则创建一个新的level对象，并压入栈（下一个循环则会对这个level进行操作）
                 if (headerPointer != null) {
-                    levelStack.push(createLevel(headerPointer, coveredSet));
+                    DLXLevel newLevel = createLevel(headerPointer, coveredMap);
+                    levelStack.push(newLevel);
                 }
             }
-
-            // 如果没有候选行或没有下一个level了，则恢复这一level的所有节点，在栈中删除这一个level的信息，返回到上一个level
+            // 如果没有候选行可选（候选栈为空），或没有下一个level了（headerPointer == null），
+            // 则恢复这一层level的所有Node，在Level栈中删除这一个level（下一个循环则会对上一个level进行操作）
             if (candidateStack.isEmpty() || headerPointer == null) {
-                // 恢复这一level的所有节点（usedStack中的所有行）
+                // 如果这是该level最后一个候选行，则恢复该行，并从coveredMap中删除
+                if (candidateStack.size() == 1) {
+                    DLXNode nodeP = candidateStack.pop();
+                    while (nodeP != null) {
+                        coveredMap.remove(nodeP.getC().getN());
+                        recoverSpaceNode(nodeP);
+                        nodeP = nodeP.getR();
+                    }
+                }
+                // 恢复这一level的所有SpaceNode（usedStack中的所有行）
                 while (!usedStack.isEmpty()) {
                     DLXNode usedNode = usedStack.pop();
                     do {
-                        recoverNode(usedNode);
+                        recoverSpaceNode(usedNode);
                         usedNode = usedNode.getR();
                     } while (usedNode != null);
                 }
+                // 恢复这一level的HeaderNode
                 if (headerPointer != null) {
-                    recoverHeadNode(headerPointer);
+                    recoverHeaderNode(headerPointer);
                 }
+                // 从栈中弹出这一Level
                 levelStack.pop();
+                // 若levelStack中仍有Level留存，则重置headerPointer。
                 if (!levelStack.isEmpty()) {
                     headerPointer = levelStack.peek().getHeader();
                 }
             }
-
+//            extractResult(levelStack);
         } while (!levelStack.isEmpty());
     }
 
-    private DLXLevel createLevel(DLXHeader headerPointer, Set<String> coveredSet) {
-        deleteHeadNode(headerPointer);
+    private DLXLevel createLevel(DLXHeader headerPointer, Map<String, String> coveredMap) {
+        deleteHeaderNode(headerPointer);
         DLXLevel nextLevel = new DLXLevel(headerPointer);
-        initLevel(headerPointer, coveredSet, nextLevel);
+        initLevel(headerPointer, coveredMap, nextLevel);
         return nextLevel;
     }
 
-    private void initLevel(DLXNode headerPointer, Set<String> coveredSet, DLXLevel level) {
+    private void initLevel(DLXNode headerPointer, Map<String, String> coveredMap, DLXLevel level) {
         Stack<DLXNode> usedStack = level.getUsedStack();
         Stack<DLXNode> candidateStack = level.getCandidateStack();
         // delete all the related rows
@@ -254,13 +313,14 @@ public class DLX {
             // delete the whole row
             DLXNode rightNode = rowHeadNode.getR();
             while (rightNode != null) {
-                deleteNode(rightNode);
-                // if overlap the header, than push to used, otherwise candidate
-                if (coveredSet.contains(rightNode.getC().getN())) {
+                deleteSpaceNode(rightNode);
+                // overlapping means this row is should not be a candidate
+                if (coveredMap.containsKey(rightNode.getC().getN())) {
                     candidateFlag = false;
                 }
                 rightNode = rightNode.getR();
             }
+            // if overlapped, push it to the usedStack, otherwise to the candidateStack
             if (candidateFlag) {
                 candidateStack.push(rowHeadNode);
             } else {
@@ -270,7 +330,7 @@ public class DLX {
         }
     }
 
-    private void deleteHeadNode(DLXHeader headerNode) {
+    private void deleteHeaderNode(DLXHeader headerNode) {
         DLXNode leftNode = headerNode.getL();
         DLXNode rightNode = headerNode.getR();
         if (leftNode != null) {
@@ -281,7 +341,7 @@ public class DLX {
         }
     }
 
-    private void recoverHeadNode(DLXHeader headerNode) {
+    private void recoverHeaderNode(DLXHeader headerNode) {
         DLXNode leftNode = headerNode.getL();
         DLXNode rightNode = headerNode.getR();
         if (leftNode != null) {
@@ -292,7 +352,7 @@ public class DLX {
         }
     }
 
-    private void deleteNode(DLXNode node) {
+    private void deleteSpaceNode(DLXNode node) {
         DLXNode upNode = node.getU();
         DLXNode downNode = node.getD();
         if (upNode != null) {
@@ -306,7 +366,7 @@ public class DLX {
         }
     }
 
-    private void recoverNode(DLXNode node) {
+    private void recoverSpaceNode(DLXNode node) {
         DLXNode upNode = node.getU();
         DLXNode downNode = node.getD();
         if (upNode != null) {
@@ -319,6 +379,78 @@ public class DLX {
             node.getC().incrementS();
         }
     }
+
+    private String[][] printResult(Map<String, String> coveredMap) {
+        String[][] boardDisplay = new String[getRowSize()][getColSize()];
+        for (Map.Entry<String, String> entry : coveredMap.entrySet()) {
+            String idx = entry.getKey();
+            String pieceId = entry.getValue();
+            if (idx.charAt(0) == '#') {
+                int idxNum = Integer.parseInt(idx.substring(1));
+                int row = idxNum / getRowSize();
+                int col = idxNum % getRowSize();
+                boardDisplay[row][col] = pieceId;
+            }
+        }
+        for (String[] row : boardDisplay) {
+            for (String cell : row) {
+                System.out.print(cell + "\t");
+            }
+            System.out.println();
+        }
+        System.out.println();
+
+        return boardDisplay;
+    }
+
+
+//    private List<List<String>> extractResult(Stack<DLXLevel> levelStack) {
+//        Stack<DLXLevel> tempLevelStack = new Stack<>();
+//        List<List<String>> pieceDisplays = new ArrayList<>();
+//        while (!levelStack.isEmpty()) {
+//            DLXLevel level = levelStack.pop();
+//            tempLevelStack.add(level);
+//            if (level.getCandidateStack().isEmpty()) {
+//                continue;
+//            }
+//            DLXNode resultNode = level.getCandidateStack().peek();
+//            List<String> pieceDisplay = new ArrayList<>();
+//            while (resultNode != null) {
+//                pieceDisplay.add(resultNode.getC().getN());
+//                resultNode = resultNode.getR();
+//            }
+//            pieceDisplays.add(pieceDisplay);
+//        }
+//        while (!tempLevelStack.isEmpty()) {
+//            levelStack.add(tempLevelStack.pop());
+//        }
+//        printResult(pieceDisplays);
+//        return pieceDisplays;
+//    }
+//
+//    private char[][] printResult(List<List<String>> pieceDisplays) {
+//        char[][] boardDisplay = new char[getRowSize()][getColSize()];
+//        char identityChar = 'A';
+//        for (List<String> pieceDisplay : pieceDisplays) {
+//            for (String pieceCell : pieceDisplay) {
+//                if (pieceCell.charAt(0) == '#') {
+//                    int idxNum = Integer.parseInt(pieceCell.substring(1));
+//                    int row = idxNum / getRowSize();
+//                    int col = idxNum % getRowSize();
+//                    boardDisplay[row][col] = identityChar;
+//                }
+//            }
+//            identityChar++;
+//        }
+//        for (char[] row : boardDisplay) {
+//            for (char cell : row) {
+//                System.out.print(cell);
+//            }
+//            System.out.println();
+//        }
+//        System.out.println();
+//        return boardDisplay;
+//    }
 
 
 }

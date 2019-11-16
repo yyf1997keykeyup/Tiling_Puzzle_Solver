@@ -120,18 +120,18 @@ public class FileParser {
         List<Piece> pieces = fp.CellsToPieces(cellsDisplay);
         Piece board = fp.extractBoard(pieces);
 
-//        System.out.println("pieces:");
-//        for (Piece piece : pieces) {
-//            System.out.println("pieces " + piece.getId() + ":");
-//            for (char[] line : piece.getDisplay()) {
-//                System.out.println(line);
-//            }
-//        }
-//
-//        System.out.println("board:");
-//        for (char[] line : board.getDisplay()) {
-//            System.out.println(line);
-//        }
+        System.out.println("pieces:");
+        for (Piece piece : pieces) {
+            System.out.println("pieces " + piece.getId() + ":");
+            for (char[] line : piece.getDisplay()) {
+                System.out.println(line);
+            }
+        }
+
+        System.out.println("board:");
+        for (char[] line : board.getDisplay()) {
+            System.out.println(line);
+        }
 
         DLX dlx = new DLX(board, pieces);
         dlx.run();
@@ -139,11 +139,20 @@ public class FileParser {
     }
 
     public static void main(String[] args) {
-        System.out.println("easycase");
-        test("testcases/easycase.txt");
-        System.out.println("simplecase");
-        test("testcases/simplecase.txt");
-        System.out.println("midcase");
-        test("testcases/midcase.txt");
+//        System.out.println("easycase");
+//        test("testcases/easycase.txt");
+//        System.out.println("simplecase");
+//        test("testcases/simplecase.txt");
+//        System.out.println("midcase");
+//        test("testcases/midcase.txt");
+
+        System.out.println("basecase");
+        test("testcases/basecase.txt");
+
+//        System.out.println("allrow");
+//        test("testcases/allrow.txt");
+
+//        System.out.println("pentominoes3*20");
+//        test("testcases/puzzles/pentominoes3x20.txt");
     }
 }
