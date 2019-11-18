@@ -37,6 +37,10 @@ public class DLXHeader extends DLXNode {
         return S;
     }
 
+    public void setS(int s) {
+        S = s;
+    }
+
     public void incrementS() {
         S++;
     }

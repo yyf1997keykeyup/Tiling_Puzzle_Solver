@@ -120,22 +120,30 @@ public class FileParser {
         List<Piece> pieces = fp.CellsToPieces(cellsDisplay);
         Piece board = fp.extractBoard(pieces);
 
-        System.out.println("pieces:");
-        for (Piece piece : pieces) {
-            System.out.println("pieces " + piece.getId() + ":");
-            for (char[] line : piece.getDisplay()) {
-                System.out.println(line);
-            }
-        }
+//        System.out.println("pieces:");
+//        for (Piece piece : pieces) {
+//            System.out.println("pieces " + piece.getId() + ":");
+//            for (char[] line : piece.getDisplay()) {
+//                System.out.println(line);
+//            }
+//        }
+//
+//        System.out.println("board:");
+//        for (char[] line : board.getDisplay()) {
+//            System.out.println(line);
+//        }
 
-        System.out.println("board:");
-        for (char[] line : board.getDisplay()) {
-            System.out.println(line);
-        }
-
-        DLX dlx = new DLX(board, pieces);
-        dlx.run();
-//        System.out.println("END");
+        long startTime = System.currentTimeMillis(); //程序开始记录时间
+        boolean rotation = true;
+        boolean reflection = false;
+        DLX dlx = new DLX(board, pieces, rotation, reflection);
+        dlx.search(0);
+        System.out.println("count: " + dlx.getSolutionCount());
+//        dlx.run();
+//        System.out.println(dlx.getSolution().size());
+        long endTime   = System.currentTimeMillis(); //程序结束记录时间
+        long TotalTime = endTime - startTime;       //总消耗时间
+        System.out.println("time: " + TotalTime + " ms");
     }
 
     public static void main(String[] args) {
@@ -143,6 +151,7 @@ public class FileParser {
 //        test("testcases/easycase.txt");
 //        System.out.println("simplecase");
 //        test("testcases/simplecase.txt");
+
 //        System.out.println("midcase");
 //        test("testcases/midcase.txt");
 
@@ -152,7 +161,10 @@ public class FileParser {
 //        System.out.println("allrow");
 //        test("testcases/allrow.txt");
 
-//        System.out.println("pentominoes3*20");
+//        System.out.println("pentominoes4x7");
+//        test("testcases/puzzles/pentominoes4x7.txt");
+
+//        System.out.println("pentominoes3x20");
 //        test("testcases/puzzles/pentominoes3x20.txt");
     }
 }
