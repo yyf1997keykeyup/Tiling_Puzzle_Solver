@@ -4,12 +4,11 @@ import solver.DLX;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class FileParser {
     private static char BLANK = ' ';
-    private String filePath = "";
+    private String filePath;
 
     public FileParser(String filePath) {
         this.filePath = filePath;
@@ -113,8 +112,10 @@ public class FileParser {
         return board;
     }
 
+    // todo: delete it later. For debugging right now.
     public static void test(String path) {
-        // todo: delete it later. For debugging right now.
+        long startTime = System.currentTimeMillis();
+
         FileParser fp = new FileParser(path);
         List<List<Character>> cellsDisplay = fp.read();
         List<Piece> pieces = fp.CellsToPieces(cellsDisplay);
@@ -132,18 +133,23 @@ public class FileParser {
 //        for (char[] line : board.getDisplay()) {
 //            System.out.println(line);
 //        }
-
-        long startTime = System.currentTimeMillis(); //程序开始记录时间
         boolean rotation = true;
         boolean reflection = false;
         DLX dlx = new DLX(board, pieces, rotation, reflection);
         dlx.search(0);
+        for(int[][] solution: dlx.getSolutions()) {
+            System.out.println("Solution #" + (dlx.getSolutionCount() + 1) + ": ");
+            for (int[] row : solution) {
+                for (int cell : row) {
+                    System.out.print(cell + "\t");
+                }
+                System.out.println();
+            }
+            System.out.println();
+
+        }
         System.out.println("count: " + dlx.getSolutionCount());
-//        dlx.run();
-//        System.out.println(dlx.getSolution().size());
-        long endTime   = System.currentTimeMillis(); //程序结束记录时间
-        long TotalTime = endTime - startTime;       //总消耗时间
-        System.out.println("time: " + TotalTime + " ms");
+        System.out.println("time: " + (System.currentTimeMillis() - startTime) + " ms");
     }
 
     public static void main(String[] args) {
@@ -155,14 +161,11 @@ public class FileParser {
 //        System.out.println("midcase");
 //        test("testcases/midcase.txt");
 
-        System.out.println("basecase");
-        test("testcases/basecase.txt");
+//        System.out.println("basecase");
+//        test("testcases/basecase.txt");
 
-//        System.out.println("allrow");
-//        test("testcases/allrow.txt");
-
-//        System.out.println("pentominoes4x7");
-//        test("testcases/puzzles/pentominoes4x7.txt");
+        System.out.println("pentominoes8x8_corner_missing");
+        test("testcases/puzzles/pentominoes8x8_corner_missing.txt");
 
 //        System.out.println("pentominoes3x20");
 //        test("testcases/puzzles/pentominoes3x20.txt");

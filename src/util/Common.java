@@ -22,7 +22,7 @@ public class Common {
         List<char[][]> RotatedMatrixList = new ArrayList<>();
         for (char[][] matrix : matrixList) {
             char[][] currMatrix = matrix;
-            for (int i=0; i<3; i++){
+            for (int i = 0; i < 3; i++) {
                 char[][] newMatrix = rotateMatrixBy90Degree(currMatrix);
                 // 检查所有的matrix
                 boolean isDuplicated = false;
@@ -55,7 +55,7 @@ public class Common {
 
         for (int i = 0; i < totalRowsOfReflectedMatrix; i++) {
             for (int j = 0; j < totalColsOfReflectedMatrix; j++) {
-                reflectedMatrix[i][ (totalColsOfReflectedMatrix-1)- j] = matrix[i][j];
+                reflectedMatrix[i][(totalColsOfReflectedMatrix - 1) - j] = matrix[i][j];
             }
         }
         return reflectedMatrix;
@@ -96,8 +96,8 @@ public class Common {
         if (colLength != matrixB[0].length) {
             return false;
         }
-        for (int i=0; i<rowLength; i++) {
-            for (int j=0; j<colLength; j++) {
+        for (int i = 0; i < rowLength; i++) {
+            for (int j = 0; j < colLength; j++) {
                 if (matrixA[i][j] != matrixB[i][j]) {
                     return false;
                 }
@@ -128,7 +128,7 @@ public class Common {
 
         for (int i = 0; i < totalRowsOfReflectedMatrix; i++) {
             for (int j = 0; j < totalColsOfReflectedMatrix; j++) {
-                reflectedMatrix[i][ (totalColsOfReflectedMatrix-1)- j] = matrix[i][j];
+                reflectedMatrix[i][(totalColsOfReflectedMatrix - 1) - j] = matrix[i][j];
             }
         }
         return reflectedMatrix;
@@ -142,8 +142,8 @@ public class Common {
         if (matrixA[0].length != matrixB[0].length) {
             return false;
         }
-        for (int i=0; i<matrixA.length; i++) {
-            for (int j=0; j<matrixA[0].length; j++) {
+        for (int i = 0; i < matrixA.length; i++) {
+            for (int j = 0; j < matrixA[0].length; j++) {
                 if (matrixA[i][j] != matrixB[i][j]) {
                     return false;
                 }
@@ -154,9 +154,9 @@ public class Common {
 
     public static void main(String[] args) {
         char[][] matrix = new char[4][2];
-        for (int i=0; i<4; i++) {
-            for (int j=0; j<2; j++) {
-                matrix[i][j] = (char)('a' + i*2 + j);
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 2; j++) {
+                matrix[i][j] = (char) ('a' + i * 2 + j);
             }
         }
         char[][] res1 = rotateMatrixBy90Degree(matrix);
@@ -169,5 +169,4 @@ public class Common {
         setReflectedMatrixList(matrixList);
         System.out.println();
     }
-
 }
