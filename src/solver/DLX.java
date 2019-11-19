@@ -9,33 +9,33 @@ import static util.Common.*;
 public class DLX {
 
     private DLXHeader headerDummy;
-    private List<DLXNode> rowDummies;
-    private DLXHeader DLXSpaceHeaderEnd;  // the end of space headers, start of piece headers.
     private char[][] boardDisplay;
+    private boolean allowRotation;
+    private boolean allowReflection;
+    private Stack<DLXNode> currSolutionStack;
+    private List<int[][]> solutions;
+
+    private DLXHeader DLXSpaceHeaderEnd;  // the end of space headers, start of piece headers.
     private HashMap<Integer, DLXHeader> idx2spaceHeader;
     private HashMap<DLXHeader, Integer> spaceHeader2idx;
     private HashMap<String, DLXHeader> id2PieceHeader;
     private HashMap<DLXHeader, DLXNode> header2lowestNode;
-    private boolean allowRotation;
-    private boolean allowReflection;
-    private List<int[][]> solutions;
 
-    private Stack<DLXNode> currSolutionStack;
 
     public DLX(Piece board, List<Piece> pieces, boolean allowRotation, boolean allowReflection) {
         headerDummy = new DLXHeader();
         headerDummy.setS(Integer.MAX_VALUE);
-        rowDummies = new ArrayList<>();
         boardDisplay = board.getDisplay();
+        this.allowRotation = allowRotation;
+        this.allowReflection = allowReflection;
+        currSolutionStack = new Stack<>();
+        solutions = new ArrayList<>();
+
         idx2spaceHeader = new HashMap<>();
         spaceHeader2idx = new HashMap<>();
         id2PieceHeader = new HashMap<>();
         header2lowestNode = new HashMap<>();
-        solutions = new ArrayList<>();
-        currSolutionStack = new Stack<>();
 
-        this.allowRotation = allowRotation;
-        this.allowReflection = allowReflection;
         addHeaders(pieces);
         addRows(pieces);
     }
@@ -48,11 +48,11 @@ public class DLX {
         this.allowReflection = allowReflection;
     }
 
-    public int getRowSize() {
+    private int getRowSize() {
         return boardDisplay.length;
     }
 
-    public int getColSize() {
+    private int getColSize() {
         if (boardDisplay.length == 0) {
             return 0;
         }
@@ -120,11 +120,9 @@ public class DLX {
         for (Piece piece : pieces) {
             List<char[][]> displayList = new ArrayList<>();
             displayList.add(piece.getDisplay());
-            // 是否允许翻转
             if (allowRotation) {
                 setRotatedMatrixList(displayList);
             }
-            // 是否允许镜像
             if (allowReflection) {
                 setReflectedMatrixList(displayList);
             }
@@ -149,7 +147,7 @@ public class DLX {
     }
 
     private boolean isDisplayMatch(char[][] display, int offsetRow, int offsetCol) {
-        /**
+        /*
          * piece的所有单元格能否覆盖到面板，并且颜色匹配
          */
         int matchSum = 0;
@@ -168,7 +166,7 @@ public class DLX {
     }
 
     private boolean pieceCellMatch(int idx, char color) {
-        /**
+        /*
          * 某个单元格能否覆盖到面板，并且颜色匹配
          */
         if (!idx2spaceHeader.containsKey(idx)) {
@@ -180,7 +178,7 @@ public class DLX {
     }
 
     private boolean isColorMatchHeader(DLXHeader header, char color) {
-        /**
+        /*
          * piece的某个单元的颜色是否能够能与面板的颜色匹配
          */
         if (color == '\u0000') {
@@ -208,7 +206,6 @@ public class DLX {
             }
         }
         DLXHeader header = id2PieceHeader.get(String.valueOf(id));
-        rowDummies.add(rowDummy);
         rowHead = addNode(header, rowHead);
         rowHead.setR(rowDummy.getR());
         rowDummy.getR().setL(rowHead);
@@ -222,8 +219,8 @@ public class DLX {
         rowHead.setR(newNode);
         DLXNode upperNode = header2lowestNode.get(header);
 
-        newNode.setU(upperNode);  // set UP node
-        upperNode.setD(newNode);  // set DOWN node
+        newNode.setU(upperNode);
+        upperNode.setD(newNode);
         header2lowestNode.put(header, newNode);
 
         newNode.setC(header);
@@ -243,9 +240,10 @@ public class DLX {
     private boolean isResultAsymmetric(int[][] target, int[][] source) {
         int[][] targetRotated90 = rotateMatrixBy90Degree(source);
         int[][] targetRotated180 = rotateMatrixBy90Degree(targetRotated90);
-        // When width == height. At most 8 symmetric patterns.
+        int[][] targetRotated270 = rotateMatrixBy90Degree(targetRotated180);
+
+        // If width == height. At most 8.
         if (target.length == target[0].length) {
-            int[][] targetRotated270 = rotateMatrixBy90Degree(targetRotated180);
             return isMatrixDuplicated(target, source) ||
                     isMatrixDuplicated(target, targetRotated90) ||
                     isMatrixDuplicated(target, targetRotated180) ||
@@ -255,8 +253,7 @@ public class DLX {
                     isMatrixDuplicated(target, reflectMatrix(targetRotated180)) ||
                     isMatrixDuplicated(target, reflectMatrix(targetRotated270));
         }
-
-        // When width != height. At most 4 symmetric patterns.
+        // If width != height. At most 4.
         else {
             return isMatrixDuplicated(target, source) ||
                     isMatrixDuplicated(target, targetRotated180) ||
@@ -274,7 +271,7 @@ public class DLX {
                 solutions.add(display);
             }
         } else {
-            DLXHeader column = chooseColumn();
+            DLXHeader column = chooseColumn(true);
             coverColumn(column);
             for (DLXNode firstNode = column.getD(); firstNode != column; firstNode = firstNode.getD()) {
                 currSolutionStack.push(firstNode);
@@ -294,16 +291,23 @@ public class DLX {
         }
     }
 
-    private DLXHeader chooseColumn() {
-        int smallest = Integer.MAX_VALUE;
-        DLXHeader resColumn = headerDummy.getR();
-        for (DLXHeader header = headerDummy.getR(); header != headerDummy; header = header.getR()) {
-            if (header.getS() < smallest) {
-                smallest = header.getS();
-                resColumn = header;
+    private DLXHeader chooseColumn(boolean isOptimal) {
+        if (isOptimal) {
+            // optimal version: choose the header with minimum size
+            int smallest = Integer.MAX_VALUE;
+            DLXHeader resColumn = headerDummy.getR();
+            for (DLXHeader header = headerDummy.getR(); header != headerDummy; header = header.getR()) {
+                if (header.getS() < smallest) {
+                    smallest = header.getS();
+                    resColumn = header;
+                }
             }
+            return resColumn;
+        } else {
+            // normal version: choose the next header
+            return headerDummy.getR();
         }
-        return resColumn;
+
     }
 
     private void coverColumn(DLXHeader column) {
@@ -311,8 +315,6 @@ public class DLX {
         column.getL().setR(column.getR());
         for (DLXNode firstNode = column.getD(); firstNode != column; firstNode = firstNode.getD()) {
             for (DLXNode node = firstNode.getR(); node != firstNode; node = node.getR()) {
-                if (node == null)
-                    System.out.println();
                 node.getD().setU(node.getU());
                 node.getU().setD(node.getD());
                 node.getC().decrementS();
@@ -333,13 +335,16 @@ public class DLX {
     }
 
     private int[][] SolutionTo2DArray() {
+        /*
+         * convert pieces stored in the currSolutionStack to 2D array.
+         */
         int[][] display = new int[getRowSize()][getColSize()];
         for (int[] row : display) {
             Arrays.fill(row, -1);
         }
-        for (int i = 0; i < currSolutionStack.size(); i++) {
-            DLXNode node = currSolutionStack.get(i);
+        for (DLXNode node : currSolutionStack) {
             int pieceId = -1;
+            // find the piece id from the headers
             DLXNode nextNode = node;
             do {
                 String colName = nextNode.getC().getN();
@@ -350,6 +355,7 @@ public class DLX {
                 nextNode = nextNode.getR();
             } while (nextNode != node);
 
+            // get all the indexes (position info), and set pieceId to the 2DArray.
             nextNode = node;
             do {
                 String colName = nextNode.getC().getN();

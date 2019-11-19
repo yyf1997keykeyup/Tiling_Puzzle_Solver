@@ -4,7 +4,9 @@ import solver.DLX;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FileParser {
     private static char BLANK = ' ';
@@ -33,13 +35,12 @@ public class FileParser {
                 line = br.readLine();
             }
         } catch (IOException e) {
-            // todo: more actions to IOException
             System.out.println(e.getMessage());
         }
         try {
             br.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         return linesToCells(lines.toArray(new String[0]));
     }
@@ -94,7 +95,10 @@ public class FileParser {
     }
 
     private Piece extractBoard(List<Piece> pieces) {
-        // search and remove board from pieces set
+        /*
+         * search and remove board from pieces set (board is the piece with maximum size)
+         */
+        // search it
         Piece board = null;
         for (Piece piece : pieces) {
             if (board == null) {
@@ -103,6 +107,7 @@ public class FileParser {
                 board = board.size() < piece.size() ? piece : board;
             }
         }
+        // remove it
         for (Piece piece : pieces) {
             if (piece.getId() == board.getId()) {
                 pieces.remove(piece);
@@ -134,7 +139,7 @@ public class FileParser {
 //            System.out.println(line);
 //        }
         boolean rotation = true;
-        boolean reflection = false;
+        boolean reflection = true;
         DLX dlx = new DLX(board, pieces, rotation, reflection);
         dlx.search(0);
         for(int[][] solution: dlx.getSolutions()) {
@@ -153,21 +158,12 @@ public class FileParser {
     }
 
     public static void main(String[] args) {
-//        System.out.println("easycase");
-//        test("testcases/easycase.txt");
-//        System.out.println("simplecase");
-//        test("testcases/simplecase.txt");
+        Map<String, String> testcases = new HashMap<>();
+        testcases.put("basecase", "testcases/basecase.txt");
 
-//        System.out.println("midcase");
-//        test("testcases/midcase.txt");
-
-//        System.out.println("basecase");
-//        test("testcases/basecase.txt");
-
-        System.out.println("pentominoes8x8_corner_missing");
-        test("testcases/puzzles/pentominoes8x8_corner_missing.txt");
-
-//        System.out.println("pentominoes3x20");
-//        test("testcases/puzzles/pentominoes3x20.txt");
+        for (Map.Entry<String, String> entry : testcases.entrySet()) {
+            System.out.println(entry.getKey());
+            test(entry.getValue());
+        }
     }
 }
