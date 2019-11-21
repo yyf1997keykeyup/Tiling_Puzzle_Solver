@@ -14,6 +14,7 @@ public class DLX {
     private boolean allowReflection;
     private Stack<DLXNode> currSolutionStack;
     private List<int[][]> solutions;
+    private int uncoveredBoardCells;
 
     private DLXHeader DLXSpaceHeaderEnd;  // the end of space headers, start of piece headers.
     private HashMap<Integer, DLXHeader> idx2spaceHeader;
@@ -30,6 +31,7 @@ public class DLX {
         this.allowReflection = allowReflection;
         currSolutionStack = new Stack<>();
         solutions = new ArrayList<>();
+        uncoveredBoardCells = 0;
 
         idx2spaceHeader = new HashMap<>();
         spaceHeader2idx = new HashMap<>();
@@ -88,6 +90,7 @@ public class DLX {
                     spaceHeader2idx.put(newSpaceHeader, id);
                     header2lowestNode.put(newSpaceHeader, newSpaceHeader);
                     newSpaceHeader.setL(curr);
+                    uncoveredBoardCells++;
                     curr.setR(newSpaceHeader);
                     curr = newSpaceHeader;
                 }
@@ -169,7 +172,7 @@ public class DLX {
         /*
          * 某个单元格能否覆盖到面板，并且颜色匹配
          */
-        if (!idx2spaceHeader.containsKey(idx)) {
+        if (color != '\u0000' && !idx2spaceHeader.containsKey(idx)) {
             return false;
         } else {
             DLXHeader header = idx2spaceHeader.get(idx);
@@ -264,7 +267,8 @@ public class DLX {
 
     // backtracking function, coming from the paper "Dancing Links".
     public void search(int k) {
-        if (headerDummy.getR() == headerDummy) {
+        if (uncoveredBoardCells == 0) {
+//        if (headerDummy.getR() == headerDummy) {
             // print the current solution and return
             int[][] display = SolutionTo2DArray();
             if (!isSolutionDuplicated(display)) {
@@ -297,7 +301,7 @@ public class DLX {
             int smallest = Integer.MAX_VALUE;
             DLXHeader resColumn = headerDummy.getR();
             for (DLXHeader header = headerDummy.getR(); header != headerDummy; header = header.getR()) {
-                if (header.getS() < smallest) {
+                if (header.getN().charAt(0) == '#' && header.getS() < smallest) {
                     smallest = header.getS();
                     resColumn = header;
                 }
@@ -311,6 +315,9 @@ public class DLX {
     }
 
     private void coverColumn(DLXHeader column) {
+        if (column.getN().charAt(0) == '#'){
+            uncoveredBoardCells--;
+        }
         column.getR().setL(column.getL());
         column.getL().setR(column.getR());
         for (DLXNode firstNode = column.getD(); firstNode != column; firstNode = firstNode.getD()) {
@@ -323,6 +330,9 @@ public class DLX {
     }
 
     private void uncoverColumn(DLXHeader column) {
+        if (column.getN().charAt(0) == '#'){
+            uncoveredBoardCells++;
+        }
         for (DLXNode firstNode = column.getU(); firstNode != column; firstNode = firstNode.getU()) {
             for (DLXNode node = firstNode.getL(); node != firstNode; node = node.getL()) {
                 node.getC().incrementS();
@@ -361,8 +371,8 @@ public class DLX {
                 String colName = nextNode.getC().getN();
                 if (colName.charAt(0) == '#') {
                     int idx = Integer.parseInt(colName.substring(1));
-                    int row = idx / getRowSize();
-                    int col = idx % getRowSize();
+                    int row = idx / getColSize();
+                    int col = idx % getColSize();
                     display[row][col] = pieceId;
                 }
                 nextNode = nextNode.getR();

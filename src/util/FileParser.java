@@ -143,7 +143,6 @@ public class FileParser {
         DLX dlx = new DLX(board, pieces, rotation, reflection);
         dlx.search(0);
         for(int[][] solution: dlx.getSolutions()) {
-            System.out.println("Solution #" + (dlx.getSolutionCount() + 1) + ": ");
             for (int[] row : solution) {
                 for (int cell : row) {
                     System.out.print(cell + "\t");
@@ -151,7 +150,6 @@ public class FileParser {
                 System.out.println();
             }
             System.out.println();
-
         }
         System.out.println("count: " + dlx.getSolutionCount());
         System.out.println("time: " + (System.currentTimeMillis() - startTime) + " ms");
@@ -159,7 +157,15 @@ public class FileParser {
 
     public static void main(String[] args) {
         Map<String, String> testcases = new HashMap<>();
-        testcases.put("basecase", "testcases/basecase.txt");
+//        testcases.put("basecase", "testcases/basecase.txt");
+//        testcases.put("4*15", "testcases/puzzles/pentominoes4x15.txt");
+        testcases.put("partial_cross", "testcases/puzzles/partial_cross.txt");
+
+//        testcases.put("simple_cross", "testcases/simple_cross.txt");
+
+//        testcases.put("redundant_pieces", "testcases/redundant_pieces.txt");
+
+
 
         for (Map.Entry<String, String> entry : testcases.entrySet()) {
             System.out.println(entry.getKey());
