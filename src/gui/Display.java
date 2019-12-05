@@ -1,7 +1,7 @@
 package gui;
 
+import solver.DLX;
 import util.FileParser;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,6 +10,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+import static util.FileParser.*;
 
 
 public class Display {
@@ -21,30 +23,27 @@ public class Display {
     private JPanel functionPanel;
     private JPanel control;
     private JCheckBox rotation;
-    private JCheckBox rotaRefl;
-    private JCheckBox extraBlocks;
+    private JCheckBox reflection;
     private JMenuBar mainMenu;
     private JMenu File;
     private JMenu Help;
-    private JCheckBox noSymmetry;
     private JButton displaySolution;
     private JPanel board;
     private JPanel result;
     private FileDialog openDia;
 
 
-    ArrayList<int[][]> solutions = new ArrayList<>();
-    ArrayList<char[][]> solBd = new ArrayList<>();
-    int[][] tempSol1 = {{-1,1,-1},{1,1,2},{-1,3,-1}};
-    char[][] tempBd1 = {{'N','X','N'}, {'X','O','X'}, {'N','O','N'}};
-
-
-    int[][] tempSol2 = {{-1,1,-1,3},{-1,1,1,2},{2 ,-1,3,-1}};
-    char[][] tempBd2 = {{'N','X','N', 'O'}, {'N','X','O','X'}, {'N','O','N','X'}};
+    List<int[][]> solutions = new ArrayList<>();
+    char[][] solBd;
+    String path;
+    DLX dlx;
+    boolean setRotate = false;
+    boolean setReflect = false;
     int clickCnt = -1;
 
-    public Display() {
 
+
+    public Display() {
 
         // 主窗口
         EventQueue.invokeLater(new Runnable() {
@@ -54,7 +53,7 @@ public class Display {
                 frame.add(mainPanel);
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.pack();
-                frame.setSize(930, 570);
+                frame.setSize(930, 680);
                 frame.setResizable(false); // irresizable
                 frame.setLocationRelativeTo(null); // center to screen
                 frame.setVisible(true);
@@ -68,32 +67,39 @@ public class Display {
                 JFileChooser fc = new JFileChooser("./testcases");
                 fc.showOpenDialog(null);
                 File f = fc.getSelectedFile();
-                String filePath = f.getPath();
-                FileParser fp = new FileParser(filePath);
-                fp.test(filePath);// todo：FileParser添加两个方法，分别返回solution和board的解；
-                                  //  ArrayList<int[][]> solutions, ArrayList<char[][]> board
-                //                 solutions = fp.getSol();
-                //                 solBd = fp.getSolBd();
+                path = f.getPath();
+                FileParser fp = new FileParser(path);
+                fp.test(path);
                 clickCnt = 0;
                 displaySolution.setEnabled(true);
-
-                solutions.add(tempSol1);
-                solutions.add(tempSol2);
-                solBd.add(tempBd1);
-                solBd.add(tempBd2);
-                result.removeAll();
-                JLabel numSol = new JLabel("Find " + solutions.size() + " solutions.");
-                result.add(numSol);
+                restart();
+//                JLabel numSol = new JLabel("Find " + solutions.size() + " solutions.");
+//                result.add(numSol);
 
             }
         });
 
         // 展示board
         displaySolution.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
+                restart();
+                dlx = loadFile(path, setRotate, setReflect);
+                solBd = dlx.getBoardDisplay();
+                solutions = dlx.getSolutions();
+                if(solutions.size() == 0) {
+                    result.removeAll();
+                    JLabel numSol = new JLabel("Find no solution.");
+                    result.add(numSol);
+                    result.revalidate();
+                } else {
+                    result.removeAll();
+                    JLabel numSol = new JLabel("Find " + solutions.size() + " solutions.");
+                    result.add(numSol);
+                    result.revalidate();
+                }
+
                 if(clickCnt < solutions.size() && clickCnt >= 0) {
-                    JPanel bd = new Board(solutions.get(clickCnt), solBd.get(clickCnt));
+                    JPanel bd = new Board(solutions.get(clickCnt), solBd);
                     board.add(bd);
                     board.revalidate();
                 } else if (clickCnt == -1) {
@@ -103,6 +109,8 @@ public class Display {
                     displaySolution.setEnabled(false);
                     new Prompt().noSolution();
                 }
+
+
             }
         });
 
@@ -118,8 +126,50 @@ public class Display {
                 }
             }
         });
+
+        // 设定可以旋转
+        rotation.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(rotation.isSelected()) {
+                    setRotate = true;
+                    displaySolution.setEnabled(true);
+                    clickCnt = 0;
+                    restart();
+                } else {
+                    setRotate = false;
+                    displaySolution.setEnabled(true);
+                    clickCnt = 0;
+                    restart();
+                }
+            }
+        });
+
+        // 设定可以翻转
+        reflection.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(reflection.isSelected()) {
+                    setReflect = true;
+                    displaySolution.setEnabled(true);
+                    restart();
+                    clickCnt = 0;
+                } else {
+                    setReflect = false;
+                    displaySolution.setEnabled(true);
+                    restart();
+                    clickCnt = 0;
+                }
+            }
+        });
     }
 
+    public void restart() {
+        result.removeAll();
+        result.revalidate();
+        board.removeAll();
+        board.revalidate();
+    }
 
     public static void main(String[] args) {
         new Display();
