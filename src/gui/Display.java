@@ -3,14 +3,13 @@ package gui;
 import util.FileParser;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
 
 
 public class Display {
@@ -28,21 +27,41 @@ public class Display {
     private JMenu File;
     private JMenu Help;
     private JCheckBox noSymmetry;
-    private JButton getSolution;
     private JButton displaySolution;
-    private JButton displayStep;
-    private JSlider changeSpeed;
-    private JButton pause;
-    private JButton stop;
     private JPanel board;
     private JPanel result;
-    private JPanel tiles;
     private FileDialog openDia;
 
 
+    ArrayList<int[][]> solutions = new ArrayList<>();
+    ArrayList<char[][]> solBd = new ArrayList<>();
+    int[][] tempSol1 = {{-1,1,-1},{1,1,2},{-1,3,-1}};
+    char[][] tempBd1 = {{'N','X','N'}, {'X','O','X'}, {'N','O','N'}};
+
+
+    int[][] tempSol2 = {{-1,1,-1,3},{-1,1,1,2},{2 ,-1,3,-1}};
+    char[][] tempBd2 = {{'N','X','N', 'O'}, {'N','X','O','X'}, {'N','O','N','X'}};
+    int clickCnt = -1;
 
     public Display() {
-    //todo: display pieces
+
+
+        // 主窗口
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JFrame frame = new JFrame("Display");
+                frame.add(mainPanel);
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.pack();
+                frame.setSize(930, 570);
+                frame.setResizable(false); // irresizable
+                frame.setLocationRelativeTo(null); // center to screen
+                frame.setVisible(true);
+            }
+        });
+
+        // 从文件中读取tiles
         read.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -51,117 +70,58 @@ public class Display {
                 File f = fc.getSelectedFile();
                 String filePath = f.getPath();
                 FileParser fp = new FileParser(filePath);
-                fp.test(filePath); // todo：返回int[][]，连接数组和board
-                Demo d = new Demo();
-//                d.launch();
+                fp.test(filePath);// todo：FileParser添加两个方法，分别返回solution和board的解；
+                                  //  ArrayList<int[][]> solutions, ArrayList<char[][]> board
+                //                 solutions = fp.getSol();
+                //                 solBd = fp.getSolBd();
+                clickCnt = 0;
+                displaySolution.setEnabled(true);
+
+                solutions.add(tempSol1);
+                solutions.add(tempSol2);
+                solBd.add(tempBd1);
+                solBd.add(tempBd2);
+                result.removeAll();
+                JLabel numSol = new JLabel("Find " + solutions.size() + " solutions.");
+                result.add(numSol);
+
+            }
+        });
+
+        // 展示board
+        displaySolution.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(clickCnt < solutions.size() && clickCnt >= 0) {
+                    JPanel bd = new Board(solutions.get(clickCnt), solBd.get(clickCnt));
+                    board.add(bd);
+                    board.revalidate();
+                } else if (clickCnt == -1) {
+                    new Prompt().readFile();
+                    clickCnt--;
+                } else if (clickCnt >= solutions.size()){
+                    displaySolution.setEnabled(false);
+                    new Prompt().noSolution();
+                }
+            }
+        });
+
+        // 展示解法
+        displaySolution.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                int c = e.getButton();// 得到按下的鼠标键
+                if (c == MouseEvent.BUTTON1) {
+                    clickCnt++;
+                    System.out.println(clickCnt);
+                }
             }
         });
     }
 
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Display");
-        frame.setContentPane(new Display().mainPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setSize(930, 570);
-        frame.setResizable(false); // irresizable
-        frame.setLocationRelativeTo(null); // center to screen
-        frame.setVisible(true);
+        new Display();
     }
-
-    private class Demo extends JFrame {
-
-        public Demo() {
-            setSize(1000, 600);
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
-            setLocationRelativeTo(null);
-            setVisible(true);
-            setLocationRelativeTo(null); // center to screen
-            setResizable(false);
-        }
-
-        public Dimension getPreferredSize() {
-            return new Dimension(600, 200);
-        }
-
-        public void launch() {
-            repaint();
-        }
-
-//        public static ArrayList<Tile> getCells() {
-//            //todo: 读取文件，并返回ArrayList，List中的元素为每个Tile，Tile的结构以二维数组存储，同时存储颜色
-//            ArrayList<Tile> Tiles = new ArrayList<>();
-//            Tile tile1 = new Tile();
-//            Tile tile2 = new Tile();
-//            int[][] cell1 = {{1, 2, 1, 2}, {0, 0, 0, 1}, {0, 0, 0, 1}};
-//            int[][] cell2 = {{1, 2, 1}, {0, 1, 0}};
-//            tile1.cells = cell1;
-//            tile2.cells = cell2;
-//            tile1.color = new Color(187, 255, 255);
-//            tile2.color = new Color(187, 255, 0);
-//            Tiles.add(tile1);
-//            Tiles.add(tile2);
-//            return Tiles;
-//        }
-
-        public void paint(Graphics g) {
-
-            int[][] sol = {{-1, 1, -1}, {1, 1, 2}, {-1, 3, -1}};
-            char[][] board = {{'N', 'X', 'N'}, {'X', 'O', 'X'}, {'N', 'O', 'N'}};
-
-            // Assign colors to all tiles
-            HashMap<Integer, Color> tileColor = new HashMap<>();
-            Random rand = new Random();
-            for (int[] i : sol) {
-                for (int j : i) {
-                    tileColor.put(j, new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
-                }
-            }
-
-            // Draw board with colors
-            int x = 100;
-            int y = 100;
-            int width = 50;
-            int height = 50;
-            final int initial_x = x;
-            final int initial_y = y;
-            for (int i = 0; i < sol.length; i++) {
-                for (int j = 0; j < sol[0].length; j++) {
-                    if (sol[i][j] != -1) {
-                        g.setColor(Color.black);
-                        g.drawRect(x, y, width, height);
-                        g.setColor(tileColor.get(sol[i][j]));
-                        g.fillRect(x + 1, y + 1, width - 1, height - 1);
-                        x += width;
-                    } else {
-                        x += width;
-                    }
-                }
-                x = initial_x;
-                y += height;
-            }
-
-            x = initial_x;
-            y = initial_y;
-            Font drawFont = new Font("Arial", Font.BOLD, 30);
-            for (int i = 0; i < board.length; i++) {
-                for (int j = 0; j < board[0].length; j++) {
-                    if (board[i][j] != 'N') {
-                        g.setFont(drawFont);
-                        g.setColor(Color.black);
-                        g.drawString(String.valueOf(board[i][j]), x + 15, y + 35);
-                        x += width;
-                    } else {
-                        x += width;
-                    }
-                }
-                x = initial_x;
-                y += height;
-            }
-        }
-    }
-
-
-
 }
