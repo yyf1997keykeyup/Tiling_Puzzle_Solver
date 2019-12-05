@@ -48,11 +48,10 @@ public class DLX {
     public char[][] getBoardDisplay() {
         return boardDisplay;
     }
-    // todo(Shilin): 设置是否允许旋转
     public void setAllowRotation(boolean allowRotation) {
         this.allowRotation = allowRotation;
     }
-    // todo(Shilin): 设置是否允许翻转
+
     public void setAllowReflection(boolean allowReflection) {
         this.allowReflection = allowReflection;
     }

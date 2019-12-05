@@ -117,18 +117,23 @@ public class FileParser {
         return board;
     }
 
-    // todo(shilin): load file
+    // todo(shilin): click get solutions
     public static DLX loadFile(String path, boolean rotation, boolean reflection) {
         FileParser fp = new FileParser(path);
         List<List<Character>> cellsDisplay = fp.read();
         List<Piece> pieces = fp.CellsToPieces(cellsDisplay);
         Piece board = fp.extractBoard(pieces);
-        return new DLX(board, pieces, rotation, reflection);
-    }
-    // todo(shilin): 点击 获取 所有解决方案
-    public static void getAllSolutions(DLX dlx) {
+        DLX dlx = new DLX(board, pieces, rotation, reflection);
         dlx.search(0);
+        return dlx;
     }
+    /*
+     * README:
+     *
+     * DLX dlx = loadFile(path, rotation, reflection);
+     * char[][] display = dlx.getBoardDisplay();
+     * List<int[][]> solutions = dlx.getSolutions();
+     */
 
     // todo: delete it later. For debugging right now.
     public static void test(String path) {
@@ -138,8 +143,6 @@ public class FileParser {
         List<List<Character>> cellsDisplay = fp.read();
         List<Piece> pieces = fp.CellsToPieces(cellsDisplay);
         Piece board = fp.extractBoard(pieces);
-
-        DLX dlx = new DLX(board, pieces, true, true);
 
 //        System.out.println("pieces:");
 //        for (Piece piece : pieces) {
