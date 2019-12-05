@@ -80,7 +80,7 @@
         </properties>
         <border type="none"/>
         <children>
-          <grid id="1b5a9" binding="control" layout-manager="GridLayoutManager" row-count="9" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="1b5a9" binding="control" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -125,77 +125,17 @@
                   <text value="Remove Symmetry"/>
                 </properties>
               </component>
-              <component id="e0c47" class="javax.swing.JButton" binding="getSolution">
-                <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <label value="Get All Solutions"/>
-                  <text value="Get All Solutions"/>
-                </properties>
-              </component>
               <component id="b5e66" class="javax.swing.JButton" binding="displaySolution">
                 <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Display Solutions"/>
                 </properties>
               </component>
-              <component id="b12ed" class="javax.swing.JButton" binding="displayStep">
-                <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Display Search Steps"/>
-                </properties>
-              </component>
-              <grid id="34d04" class="javax.swing.JSlider" binding="changeSpeed" layout-manager="FlowLayout" hgap="0" vgap="0" flow-align="0">
-                <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <alignmentX value="0.0"/>
-                  <alignmentY value="0.0"/>
-                  <majorTickSpacing value="1"/>
-                  <maximum value="5"/>
-                  <minimum value="1"/>
-                  <minorTickSpacing value="1"/>
-                  <name value="Speed"/>
-                  <opaque value="false"/>
-                  <paintLabels value="true"/>
-                  <paintTicks value="true"/>
-                  <paintTrack value="true"/>
-                  <requestFocusEnabled value="true"/>
-                  <snapToTicks value="true"/>
-                  <toolTipText value="Speed"/>
-                  <value value="1"/>
-                  <valueIsAdjusting value="false"/>
-                </properties>
-                <border type="empty" title="Speed"/>
-                <children/>
-              </grid>
-              <component id="bcc90" class="javax.swing.JButton" binding="pause">
-                <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <label value="Pause"/>
-                  <text value="Pause"/>
-                </properties>
-              </component>
-              <component id="af4e1" class="javax.swing.JButton" binding="stop">
-                <constraints>
-                  <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Stop"/>
-                </properties>
-              </component>
             </children>
           </grid>
-          <grid id="367e8" binding="result" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+          <grid id="367e8" binding="result" layout-manager="BorderLayout" hgap="0" vgap="0">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -205,45 +145,13 @@
           </grid>
         </children>
       </grid>
-      <grid id="3d40d" binding="board" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
+      <grid id="3d40d" binding="board" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints/>
         <properties>
-          <preferredSize width="500" height="500"/>
+          <preferredSize width="720" height="500"/>
         </properties>
         <border type="none" title="Board"/>
-        <children>
-          <vspacer id="495dd">
-            <constraints>
-              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </vspacer>
-          <hspacer id="44de4">
-            <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </hspacer>
-          <vspacer id="f6eb3">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </vspacer>
-        </children>
-      </grid>
-      <grid id="3167e" binding="tiles" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
-        <constraints/>
-        <properties>
-          <preferredSize width="210" height="500"/>
-        </properties>
-        <border type="none" title="Tiles"/>
-        <children>
-          <vspacer id="79720">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </vspacer>
-        </children>
+        <children/>
       </grid>
     </children>
   </grid>
