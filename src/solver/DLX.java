@@ -15,6 +15,7 @@ public class DLX {
     private Stack<DLXNode> currSolutionStack;
     private List<int[][]> solutions;
     private int uncoveredBoardCells;
+    private int rowCount;
 
     private DLXHeader DLXSpaceHeaderEnd;  // the end of space headers, start of piece headers.
     private HashMap<Integer, DLXHeader> idx2spaceHeader;
@@ -32,6 +33,7 @@ public class DLX {
         currSolutionStack = new Stack<>();
         solutions = new ArrayList<>();
         uncoveredBoardCells = 0;
+        rowCount = 0;
 
         idx2spaceHeader = new HashMap<>();
         spaceHeader2idx = new HashMap<>();
@@ -42,12 +44,25 @@ public class DLX {
         addRows(pieces);
     }
 
+    // todo(Shilin): display the color of board
+    public char[][] getBoardDisplay() {
+        return boardDisplay;
+    }
+    // todo(Shilin): 设置是否允许旋转
     public void setAllowRotation(boolean allowRotation) {
         this.allowRotation = allowRotation;
     }
-
+    // todo(Shilin): 设置是否允许翻转
     public void setAllowReflection(boolean allowReflection) {
         this.allowReflection = allowReflection;
+    }
+    // todo(Shilin): 获取所有解决方案
+    public List<int[][]> getSolutions() {
+        return solutions;
+    }
+    // todo(Shilin): 获取方案总数
+    public int getSolutionCount() {
+        return solutions.size();
     }
 
     private int getRowSize() {
@@ -59,14 +74,6 @@ public class DLX {
             return 0;
         }
         return boardDisplay[0].length;
-    }
-
-    public List<int[][]> getSolutions() {
-        return solutions;
-    }
-
-    public int getSolutionCount() {
-        return solutions.size();
     }
 
     private void addHeaders(List<Piece> pieces) {
@@ -135,6 +142,7 @@ public class DLX {
                 for (int i = 0; i + numRow <= getRowSize(); i++) {
                     for (int j = 0; j + numCol <= getColSize(); j++) {
                         if (isDisplayMatch(singleDisplay, i, j)) {
+                            rowCount++;
                             addRow(singleDisplay, piece.getId(), i, j);
                         }
                     }
@@ -240,7 +248,7 @@ public class DLX {
         return false;
     }
 
-    private boolean isResultAsymmetric(int[][] target, int[][] source) {
+    public boolean isResultAsymmetric(int[][] target, int[][] source) {
         int[][] targetRotated90 = rotateMatrixBy90Degree(source);
         int[][] targetRotated180 = rotateMatrixBy90Degree(targetRotated90);
         int[][] targetRotated270 = rotateMatrixBy90Degree(targetRotated180);
@@ -272,6 +280,7 @@ public class DLX {
             // print the current solution and return
             int[][] display = SolutionTo2DArray();
             if (!isSolutionDuplicated(display)) {
+                System.out.println(solutions.size());
                 solutions.add(display);
             }
         } else {
