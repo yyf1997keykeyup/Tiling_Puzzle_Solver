@@ -30,6 +30,8 @@ public class Display {
     private JButton displaySolution;
     private JPanel board;
     private JPanel result;
+    private JButton getAllSol;
+    private JPanel showSolSum;
     private FileDialog openDia;
 
 
@@ -68,10 +70,11 @@ public class Display {
                 fc.showOpenDialog(null);
                 File f = fc.getSelectedFile();
                 path = f.getPath();
-                FileParser fp = new FileParser(path);
-                fp.test(path);
+//                FileParser fp = new FileParser(path);
+//                fp.test(path);
                 clickCnt = 0;
                 displaySolution.setEnabled(true);
+                getAllSol.setEnabled(true);
                 restart();
 //                JLabel numSol = new JLabel("Find " + solutions.size() + " solutions.");
 //                result.add(numSol);
@@ -79,33 +82,50 @@ public class Display {
             }
         });
 
-        // 展示board
-        displaySolution.addActionListener(new ActionListener() {
+        // 获取所有
+        getAllSol.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                restart();
+                if (clickCnt == -1) {
+                    new Prompt().readFile();
+                    clickCnt--;
+                }
                 dlx = loadFile(path, setRotate, setReflect);
                 solBd = dlx.getBoardDisplay();
                 solutions = dlx.getSolutions();
+                // 在result模块展示solution个数
                 if(solutions.size() == 0) {
                     result.removeAll();
-                    JLabel numSol = new JLabel("Find no solution.");
-                    result.add(numSol);
+                    JLabel numSol1 = new JLabel("Find no solution.");
+                    result.add(numSol1, BorderLayout.PAGE_START);
                     result.revalidate();
                 } else {
                     result.removeAll();
-                    JLabel numSol = new JLabel("Find " + solutions.size() + " solutions.");
-                    result.add(numSol);
+                    JLabel numSol2 = new JLabel("Find " + solutions.size() + " solutions.");
+                    result.add(numSol2, BorderLayout.PAGE_START);
                     result.revalidate();
                 }
+                getAllSol.setEnabled(false);
+            }
+        });
 
+        // 展示board
+        displaySolution.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // 在board展示结果
                 if(clickCnt < solutions.size() && clickCnt >= 0) {
                     JPanel bd = new Board(solutions.get(clickCnt), solBd);
                     board.add(bd);
+                    JLabel cntSol = new JLabel("Solution No. " + (clickCnt+1));
+//                    cntSol.setLocation(50,300);
+                    result.removeAll();
+                    result.add(cntSol, BorderLayout.PAGE_END);
+                    result.revalidate();
                     board.revalidate();
                 } else if (clickCnt == -1) {
                     new Prompt().readFile();
                     clickCnt--;
-                } else if (clickCnt >= solutions.size()){
+                } else if (clickCnt == solutions.size()){
                     displaySolution.setEnabled(false);
                     new Prompt().noSolution();
                 }
@@ -133,12 +153,24 @@ public class Display {
             public void actionPerformed(ActionEvent e) {
                 if(rotation.isSelected()) {
                     setRotate = true;
+                    getAllSol.setEnabled(true);
                     displaySolution.setEnabled(true);
+                    // 旋转后更新solution
+                    dlx = loadFile(path, setRotate, setReflect);
+                    solBd = dlx.getBoardDisplay();
+                    solutions = dlx.getSolutions();
+                    new Prompt().updateSol();
                     clickCnt = 0;
                     restart();
                 } else {
                     setRotate = false;
+                    getAllSol.setEnabled(true);
                     displaySolution.setEnabled(true);
+                    // 旋转后更新solution
+                    dlx = loadFile(path, setRotate, setReflect);
+                    solBd = dlx.getBoardDisplay();
+                    solutions = dlx.getSolutions();
+                    new Prompt().updateSol();
                     clickCnt = 0;
                     restart();
                 }
@@ -151,17 +183,28 @@ public class Display {
             public void actionPerformed(ActionEvent e) {
                 if(reflection.isSelected()) {
                     setReflect = true;
+                    getAllSol.setEnabled(true);
                     displaySolution.setEnabled(true);
+//                    dlx = loadFile(path, setRotate, setReflect);
+//                    solBd = dlx.getBoardDisplay();
+//                    solutions = dlx.getSolutions();
+//                    new Prompt().updateSol();
                     restart();
                     clickCnt = 0;
                 } else {
                     setReflect = false;
+                    getAllSol.setEnabled(true);
                     displaySolution.setEnabled(true);
+//                    dlx = loadFile(path, setRotate, setReflect);
+//                    solBd = dlx.getBoardDisplay();
+//                    solutions = dlx.getSolutions();
+//                    new Prompt().updateSol();
                     restart();
                     clickCnt = 0;
                 }
             }
         });
+
     }
 
     public void restart() {
