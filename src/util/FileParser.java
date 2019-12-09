@@ -124,7 +124,9 @@ public class FileParser {
         List<Piece> pieces = fp.CellsToPieces(cellsDisplay);
         Piece board = fp.extractBoard(pieces);
         DLX dlx = new DLX(board, pieces, rotation, reflection);
+        long start = System.nanoTime();
         dlx.search(0);
+        System.out.println("all solutions time: " + (System.nanoTime() - start) + " nano time");
         return dlx;
     }
     /*
@@ -137,7 +139,7 @@ public class FileParser {
 
     // todo: delete it later. For debugging right now.
     public static void test(String path) {
-        long startTime = System.currentTimeMillis();
+        long startTime = System.nanoTime();
 
         FileParser fp = new FileParser(path);
         List<List<Character>> cellsDisplay = fp.read();
@@ -179,7 +181,7 @@ public class FileParser {
         }
 //        System.out.println("dupCount: " + dupCount);
         System.out.println("count: " + dlx.getSolutionCount());
-        System.out.println("time: " + (System.currentTimeMillis() - startTime) + " ms");
+        System.out.println("time: " + (System.nanoTime() - startTime) + " nano time");
     }
 
     public static void main(String[] args) {
@@ -188,7 +190,8 @@ public class FileParser {
 //        testcases.put("4*15", "testcases/puzzles/pentominoes4x15.txt");
 //        testcases.put("partial_cross", "testcases/puzzles/partial_cross.txt");
 
-          testcases.put("corner_missing", "testcases/puzzles/pentominoes8x8_corner_missing.txt");
+//          testcases.put("corner_missing", "testcases/puzzles/pentominoes8x8_corner_missing.txt");
+        testcases.put("corner_missing", "testcases/puzzles/pentominoes8x8_four_missing_corners.txt");
 
 //        testcases.put("simple_cross", "testcases/simple_cross.txt");
 //        testcases.put("redundant_pieces", "testcases/redundant_pieces.txt");

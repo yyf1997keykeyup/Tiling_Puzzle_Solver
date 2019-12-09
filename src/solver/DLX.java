@@ -23,6 +23,8 @@ public class DLX {
     private HashMap<String, DLXHeader> id2PieceHeader;
     private HashMap<DLXHeader, DLXNode> header2lowestNode;
 
+    private long startTime;
+
 
     public DLX(Piece board, List<Piece> pieces, boolean allowRotation, boolean allowReflection) {
         headerDummy = new DLXHeader();
@@ -274,13 +276,19 @@ public class DLX {
 
     // backtracking function, coming from the paper "Dancing Links".
     public void search(int k) {
+        if (k == 0) {
+            startTime = System.nanoTime();
+        }
         if (uncoveredBoardCells == 0) {
 //        if (headerDummy.getR() == headerDummy) {
             // print the current solution and return
             int[][] display = SolutionTo2DArray();
             if (!isSolutionDuplicated(display)) {
-                System.out.println(solutions.size());
+                 System.out.println("get solution #" + solutions.size());
                 solutions.add(display);
+                if (solutions.size() == 1) {
+                    System.out.println("1st solution time: " + (System.nanoTime() - startTime) + " nano time");
+                }
             }
         } else {
             DLXHeader column = chooseColumn(true);
