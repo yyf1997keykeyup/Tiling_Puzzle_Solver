@@ -46,7 +46,6 @@ public class DLX {
         addRows(pieces);
     }
 
-    // todo(Shilin): display the color of board
     public char[][] getBoardDisplay() {
         return boardDisplay;
     }
@@ -57,11 +56,11 @@ public class DLX {
     public void setAllowReflection(boolean allowReflection) {
         this.allowReflection = allowReflection;
     }
-    // todo(Shilin): 获取所有解决方案
+
     public List<int[][]> getSolutions() {
         return solutions;
     }
-    // todo(Shilin): 获取方案总数
+
     public int getSolutionCount() {
         return solutions.size();
     }
@@ -161,6 +160,7 @@ public class DLX {
     private boolean isDisplayMatch(char[][] display, int offsetRow, int offsetCol) {
         /*
          * piece的所有单元格能否覆盖到面板，并且颜色匹配
+         * Can all cells of piece cover the panel, and the colors match
          */
         int matchSum = 0;
         for (int i = 0; i < display.length; i++) {
@@ -180,6 +180,7 @@ public class DLX {
     private boolean pieceCellMatch(int idx, char color) {
         /*
          * 某个单元格能否覆盖到面板，并且颜色匹配
+         * Can a cell cover the panel and the colors match
          */
         if (color != '\u0000' && !idx2spaceHeader.containsKey(idx)) {
             return false;
@@ -192,6 +193,7 @@ public class DLX {
     private boolean isColorMatchHeader(DLXHeader header, char color) {
         /*
          * piece的某个单元的颜色是否能够能与面板的颜色匹配
+         * Can the color of a certain unit of the piece match the color of the panel
          */
         if (color == '\u0000') {
             return true;
